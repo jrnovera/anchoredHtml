@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Anchored School</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@700;900&family=Inter:wght@400;500;600;700&family=Caveat:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --teal:#0f5c5c; --teal-d:#0a4546; --teal-l:#e6f1f0; --navy:#0d2e4a; --gold:#e8a23a;
+  --ink:#1c2b33; --muted:#5c6b73; --bg:#ffffff;
+  --shadow:0 10px 30px rgba(13,46,74,.10);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html.lenis,html.lenis body{height:auto}
+.lenis.lenis-smooth{scroll-behavior:auto!important}
+body{font-family:Inter,system-ui,sans-serif;color:var(--ink);background:var(--bg);overflow-x:hidden;line-height:1.55}
+img{display:block;max-width:100%}
+a{color:inherit;text-decoration:none}
+h1,h2,h3{font-family:Merriweather,Georgia,serif;color:var(--navy)}
+.wrap{width:min(1200px,100% - 32px);margin-inline:auto}
+.w{display:inline-block;overflow:hidden;vertical-align:top;padding-bottom:.12em;margin-bottom:-.12em}
+.wi,.c{display:inline-block;will-change:transform}
+
+/* ---------- Preloader ---------- */
+#preloader{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;pointer-events:all}
+.pl-top,.pl-bot{position:absolute;left:0;right:0;height:50.5%;background:var(--navy)}
+.pl-top{top:0}.pl-bot{bottom:0;background:var(--teal-d)}
+.pl-center{position:relative;text-align:center;color:#fff}
+.pl-logo{width:120px;height:120px;margin:0 auto}
+.pl-logo path{fill:none;stroke:#fff;stroke-width:5;stroke-linecap:round;stroke-linejoin:round}
+.pl-pct{font-family:Merriweather,serif;font-size:14px;letter-spacing:4px;margin-top:18px;opacity:.8}
+.pl-pct b{font-size:42px;display:block;letter-spacing:0;color:var(--gold)}
+
+/* ---------- Cursor ---------- */
+.cursor-dot,.cursor-ring{position:fixed;top:0;left:0;pointer-events:none;z-index:999;border-radius:50%;display:none}
+.has-cursor .cursor-dot,.has-cursor .cursor-ring{display:block}
+.cursor-dot{width:8px;height:8px;background:var(--gold)}
+.cursor-ring{width:38px;height:38px;border:1.5px solid var(--gold);transition:width .35s,height .35s,background .35s,border-color .35s;display:grid;place-items:center}
+.cursor-ring.hover{width:64px;height:64px;background:rgba(232,162,58,.15)}
+.cursor-ring.label{width:92px;height:92px;background:var(--gold);border-color:var(--gold)}
+.cursor-ring::after{content:attr(data-label);font-size:12px;font-weight:700;letter-spacing:1px;color:var(--navy);opacity:0;transition:opacity .3s;text-transform:uppercase}
+.cursor-ring.label::after{opacity:1}
+
+/* ---------- Buttons ---------- */
+.btn{display:inline-flex;align-items:center;gap:8px;padding:13px 24px;border-radius:999px;font-weight:600;font-size:14px;transition:box-shadow .3s,background .3s,color .3s;position:relative;overflow:hidden;isolation:isolate}
+.btn .arr{transition:transform .3s;display:inline-block}
+.btn:hover .arr{transform:translateX(5px)}
+.btn:hover{box-shadow:0 14px 28px rgba(0,0,0,.2)}
+.btn::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:inherit;transform:translateY(101%);transition:transform .5s cubic-bezier(.7,0,.2,1)}
+.btn:hover::before{transform:none}
+.btn-solid{background:var(--teal);color:#fff}.btn-solid::before{background:var(--navy)}
+.btn-outline{border:1.5px solid var(--teal);color:var(--teal)}.btn-outline::before{background:var(--teal)}.btn-outline:hover{color:#fff}
+.btn-ghost{border:1.5px solid rgba(255,255,255,.8);color:#fff}.btn-ghost::before{background:#fff}.btn-ghost:hover{color:var(--teal)}
+.btn-w{background:#fff;color:var(--teal)}.btn-w::before{background:var(--gold)}.btn-w:hover{color:var(--navy)}
+
+#progress{position:fixed;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gold),#6fd0c4);z-index:900;transform-origin:left;transform:scaleX(0)}
+
+/* ---------- Top + Nav ---------- */
+.topbar{background:var(--teal-d);color:#dfeeee;font-size:12.5px}
+.topbar .wrap{display:flex;justify-content:space-between;align-items:center;padding:8px 0;gap:16px;flex-wrap:wrap}
+.topbar .l{display:flex;gap:22px;flex-wrap:wrap}
+.topbar em{font-family:Caveat,cursive;font-size:18px;font-style:normal}
+header.nav{position:sticky;top:0;z-index:60;background:rgba(255,255,255,.92);backdrop-filter:blur(12px);transition:box-shadow .3s,transform .5s cubic-bezier(.7,0,.2,1)}
+header.nav.scrolled{box-shadow:0 6px 24px rgba(0,0,0,.08)}
+header.nav.hide{transform:translateY(-110%)}
+header.nav .wrap{display:flex;align-items:center;justify-content:space-between;padding:12px 0}
+.logo{display:flex;align-items:center;gap:10px}
+.logo svg{width:58px;height:58px;transition:transform .8s cubic-bezier(.2,.8,.2,1)}
+.logo:hover svg{transform:rotate(-12deg) scale(1.08)}
+.menu{display:flex;gap:26px;list-style:none;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.3px}
+.menu a{position:relative;padding:6px 0;display:inline-block;overflow:hidden}
+.menu a span{display:block;transition:transform .45s cubic-bezier(.7,0,.2,1)}
+.menu a span::after{content:attr(data-t);position:absolute;left:0;top:100%;color:var(--teal)}
+.menu a:hover span{transform:translateY(-100%)}
+.menu a.active{color:var(--teal)}
+.menu a.active::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;background:var(--teal)}
+.nav-cta{display:flex;gap:10px}
+.burger{display:none;background:none;border:0;font-size:26px;color:var(--teal);cursor:pointer}
+
+/* ---------- Hero ---------- */
+.hero{position:relative;height:100vh;min-height:600px;overflow:hidden;display:grid;place-items:center;text-align:center;color:#fff;clip-path:inset(0% 0% 0% 0% round 0px 0px 0px 0px);background:var(--navy)}
+.hero-media{position:absolute;inset:0;overflow:hidden}
+.hero-media video,.hero-media .poster{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.hero-media .poster{background:url(https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=1800&q=70) center/cover}
+.hero-overlay{position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(10,40,50,.35),rgba(10,30,45,.85)),linear-gradient(180deg,rgba(10,40,50,.3),rgba(10,40,50,.6))}
+#particles{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.hero-content{position:relative;z-index:2;padding:0 16px}
+.eyebrow{letter-spacing:5px;font-size:12px;text-transform:uppercase;display:inline-flex;align-items:center;gap:12px}
+.eyebrow::before,.eyebrow::after{content:"";width:34px;height:1px;background:var(--gold)}
+.hero h1{color:#fff;font-size:clamp(42px,7.5vw,96px);margin:16px 0 18px;line-height:1.05;perspective:800px}
+.hero h1 em{font-style:normal;color:var(--gold)}
+.hero p{max-width:540px;margin:0 auto 32px;font-size:17px;opacity:.92}
+.hero .cta{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+.scroll-cue{position:absolute;bottom:32px;left:50%;margin-left:-13px;z-index:2;width:26px;height:42px;border:2px solid #fff;border-radius:14px}
+.scroll-cue::before{content:"";position:absolute;left:50%;top:8px;width:4px;height:8px;margin-left:-2px;background:#fff;border-radius:2px;animation:cue 1.6s infinite}
+@keyframes cue{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(14px)}}
+.hero-side{position:absolute;right:28px;bottom:40px;z-index:2;writing-mode:vertical-rl;font-size:11px;letter-spacing:4px;text-transform:uppercase;opacity:.7}
+
+/* ---------- Marquee ---------- */
+.marquee{background:var(--teal);color:#fff;overflow:hidden;padding:18px 0;white-space:nowrap}
+.marquee.alt{background:var(--gold);color:var(--navy);transform:rotate(-2deg);margin:-10px -20px;position:relative;z-index:3}
+.mq-track{display:inline-flex;will-change:transform}
+.mq-track span{font-family:Merriweather,serif;font-size:clamp(20px,2.6vw,32px);padding:0 28px;display:inline-flex;align-items:center;gap:56px}
+.mq-track span::after{content:"✦";color:var(--gold);font-size:.7em}
+.marquee.alt .mq-track span::after{color:var(--teal)}
+
+section{position:relative}
+.sec-head{text-align:center;margin-bottom:46px}
+.sec-head h2{font-size:clamp(30px,4vw,46px)}
+.row-head{display:flex;justify-content:space-between;align-items:end;gap:16px;margin-bottom:28px;flex-wrap:wrap}
+.row-head h2{font-size:clamp(26px,3.2vw,38px)}
+.kicker{display:block;color:var(--gold);font-weight:700;letter-spacing:3px;font-size:12px;text-transform:uppercase;margin-bottom:8px}
+.link{color:var(--teal);font-weight:600;font-size:14px;position:relative;padding-bottom:3px}
+.link::after{content:"";position:absolute;left:0;bottom:0;width:100%;height:1px;background:currentColor;transform-origin:right;transition:transform .5s}
+.link:hover::after{transform:scaleX(0)}
+.link .arr{display:inline-block;transition:transform .3s}.link:hover .arr{transform:translateX(5px)}
+.underline{position:relative;display:inline-block}
+.underline::after{content:"";position:absolute;left:0;bottom:-10px;height:3px;width:100%;background:var(--gold);transform:scaleX(0);transform-origin:left;transition:transform 1.2s cubic-bezier(.7,0,.2,1) .5s}
+.underline.in::after{transform:scaleX(1)}
+
+/* glare cards */
+.glare{position:relative;overflow:hidden}
+.glare::before{content:"";position:absolute;inset:0;pointer-events:none;z-index:3;background:radial-gradient(260px circle at var(--mx,50%) var(--my,50%),rgba(255,255,255,.55),transparent 60%);opacity:0;transition:opacity .4s;mix-blend-mode:soft-light}
+.glare:hover::before{opacity:1}
+
+/* ---------- Why ---------- */
+.why{padding:110px 0 100px;background:linear-gradient(180deg,#fff,#eef6f5);overflow:hidden}
+.leaf{position:absolute;width:280px;opacity:.16;color:var(--teal)}
+.leaf.l1{left:-50px;top:60px}.leaf.r1{right:-50px;top:40px}
+.cards4{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;position:relative}
+.why-card{background:#fff;border-radius:18px;padding:34px 24px;text-align:center;box-shadow:var(--shadow);transition:box-shadow .45s;transform-style:preserve-3d}
+.why-card:hover{box-shadow:0 30px 60px rgba(15,92,92,.22)}
+.why-card::after{content:"";position:absolute;left:0;right:0;bottom:0;height:4px;background:linear-gradient(90deg,var(--teal),var(--gold));transform:scaleX(0);transition:transform .6s}
+.why-card:hover::after{transform:scaleX(1)}
+.icon{width:70px;height:70px;border-radius:50%;background:var(--teal);color:#fff;display:grid;place-items:center;margin:0 auto 18px;position:relative}
+.icon::before{content:"";position:absolute;inset:-8px;border-radius:50%;border:1.5px dashed rgba(15,92,92,.4);animation:spin 14s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.icon svg{width:32px;height:32px}
+.why-card h3{font-size:19px;margin-bottom:10px}
+.why-card p{color:var(--muted);font-size:14.5px}
+
+/* ---------- Stats ---------- */
+.stats{padding:120px 0;color:#fff;overflow:hidden;background:var(--navy)}
+.stats-bg{position:absolute;inset:-20% 0;background:url(https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?w=1800&q=60) center/cover}
+.stats::after{content:"";position:absolute;inset:0;background:linear-gradient(120deg,rgba(13,46,74,.93),rgba(15,92,92,.85))}
+.stats .wrap{position:relative;z-index:2}
+.stats h2{color:#fff;text-align:center;font-size:clamp(28px,4vw,48px);margin-bottom:56px}
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;text-align:center}
+.stat b{display:block;font-family:Merriweather,serif;font-size:clamp(44px,5.5vw,72px);color:var(--gold);line-height:1}
+.stat span{display:block;margin-top:10px;font-size:14px;letter-spacing:1.5px;text-transform:uppercase;opacity:.85}
+.stat{padding:20px;border-left:1px solid rgba(255,255,255,.15)}.stat:first-child{border:0}
+
+/* ---------- Environment (horizontal) ---------- */
+.env{padding:90px 0;background:#eef6f5;overflow:hidden}
+.env-track{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;width:min(1200px,100% - 32px);margin-inline:auto}
+.tile{position:relative;border-radius:18px;overflow:hidden;aspect-ratio:4/3.3;box-shadow:var(--shadow);clip-path:inset(0% 0% 0% 0% round 18px)}
+.tile img{position:absolute;top:0;left:-12%;width:124%;height:100%;object-fit:cover;transition:scale 1.2s cubic-bezier(.2,.8,.2,1)}
+.tile:hover img{scale:1.08}
+.tile::after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 40%,rgba(0,0,0,.78))}
+.tile .cap{position:absolute;left:24px;right:24px;bottom:22px;z-index:2;color:#fff}
+.tile .num{font-family:Merriweather,serif;font-size:14px;color:var(--gold);display:block;margin-bottom:6px}
+.tile .cap b{font-family:Merriweather,serif;font-size:clamp(18px,2vw,26px);display:block}
+.tile .cap small{font-size:14px;opacity:.9}
+.env-progress{height:2px;background:rgba(15,92,92,.15);margin-top:34px;display:none}
+.env-progress span{display:block;height:100%;background:var(--teal);transform-origin:left;transform:scaleX(0)}
+@media (min-width:1001px){
+  .env{height:100vh;display:flex;flex-direction:column;justify-content:center;padding:60px 0}
+  .env-track{display:flex;width:max-content;margin:0;gap:30px;padding-left:max(16px,calc((100vw - 1200px)/2));padding-right:8vw}
+  .tile{width:min(620px,44vw);height:58vh;aspect-ratio:auto;flex:none}
+  .tile.end{width:min(420px,30vw);background:var(--teal);display:grid;place-items:center;text-align:center;color:#fff;padding:30px}
+  .tile.end::after{display:none}
+  .env-progress{display:block}
+}
+.tile.end h3{color:#fff;font-size:28px;margin-bottom:18px}
+@media (max-width:1000px){.tile.end{background:var(--teal);display:grid;place-items:center;text-align:center;color:#fff;padding:24px}.tile.end::after{display:none}}
+
+/* ---------- Programs ---------- */
+.programs{padding:110px 0}
+.prog-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:18px}
+.prog{border:1px solid #e3ecec;border-radius:16px;padding:16px;background:#fff;transition:box-shadow .4s,border-color .4s;display:flex;flex-direction:column}
+.prog:hover{box-shadow:0 26px 50px rgba(15,92,92,.18);border-color:var(--teal)}
+.prog h4{display:flex;align-items:center;gap:10px;font-family:Merriweather,serif;font-size:15px;color:var(--navy);margin-bottom:12px}
+.prog h4 svg{width:26px;height:26px;color:var(--teal);transition:transform .6s}
+.prog:hover h4 svg{transform:rotate(-20deg) scale(1.2)}
+.prog .ph{border-radius:10px;overflow:hidden;aspect-ratio:4/3}
+.prog .ph img{width:100%;height:100%;object-fit:cover;transition:transform 1s cubic-bezier(.2,.8,.2,1),filter .6s;filter:saturate(.85)}
+.prog:hover .ph img{transform:scale(1.14);filter:saturate(1.15)}
+.prog .foot{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:12px;font-size:13px;color:var(--muted);flex:1}
+.circ{flex:none;width:32px;height:32px;border-radius:50%;border:1.5px solid var(--teal);color:var(--teal);display:grid;place-items:center;transition:background .3s,color .3s,transform .5s}
+.prog:hover .circ{background:var(--teal);color:#fff;transform:rotate(-45deg)}
+
+/* ---------- Purpose ---------- */
+.purpose{padding:110px 0;background:linear-gradient(90deg,#fff 40%,#eef6f5);overflow:hidden}
+.purpose .wrap{display:grid;grid-template-columns:1fr 1.1fr .8fr;gap:36px;align-items:center}
+.purpose .txt{border-left:4px solid var(--gold);padding-left:26px}
+.purpose h2{font-size:clamp(28px,3.2vw,40px);margin-bottom:16px}
+.purpose p{color:var(--ink);margin-bottom:24px;font-size:16.5px}
+.purpose .img{border-radius:22px;overflow:hidden;aspect-ratio:4/3.2;box-shadow:0 30px 60px rgba(13,46,74,.18);clip-path:inset(0% 0% 0% 0% round 22px)}
+.purpose .img img{width:100%;height:100%;object-fit:cover}
+.quote{font-family:Caveat,cursive;font-size:34px;color:var(--navy);line-height:1.2}
+.qbar{display:block;width:56px;height:3px;background:var(--gold);margin-bottom:16px;transform-origin:left}
+.ql{display:block;clip-path:inset(0 0% 0 0)}
+.quote small{display:block;font-family:Inter;font-size:12px;letter-spacing:2px;margin-top:12px;color:var(--muted)}
+
+/* ---------- Band ---------- */
+.band{background:linear-gradient(110deg,var(--teal),var(--teal-d),#12706b,var(--teal));background-size:300% 100%;animation:grad 10s ease infinite;color:#fff;padding:60px 0;overflow:hidden;clip-path:inset(0% 0% 0% 0% round 0px)}
+@keyframes grad{50%{background-position:100% 0}}
+.band::before{content:"";position:absolute;width:420px;height:420px;border-radius:50%;background:radial-gradient(circle,rgba(232,162,58,.35),transparent 65%);right:-100px;top:-160px;animation:float 8s ease-in-out infinite alternate}
+@keyframes float{to{transform:translate(-120px,80px)}}
+.band .wrap{position:relative;display:flex;align-items:center;gap:30px;flex-wrap:wrap}
+.cal{width:90px;height:90px;border-radius:50%;background:#fff;color:var(--teal);display:grid;place-items:center;animation:pulse 2.5s infinite;flex:none}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,255,255,.5)}70%{box-shadow:0 0 0 22px rgba(255,255,255,0)}100%{box-shadow:0 0 0 0 rgba(255,255,255,0)}}
+.band .t{flex:1;min-width:260px;border-left:1px solid rgba(255,255,255,.3);padding-left:30px}
+.band h2{color:#fff;font-size:clamp(22px,2.8vw,32px)}
+.band small{letter-spacing:3px;text-transform:uppercase;color:var(--gold);font-weight:700}
+
+/* ---------- Testimonials ---------- */
+.testi{padding:110px 0 130px;background:#fff}
+.t-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.t-card{display:flex;gap:18px;padding:26px;border-radius:16px;box-shadow:var(--shadow);background:#fff}
+.t-card .av{flex:none;width:84px;height:84px;border-radius:50%;padding:3px;background:conic-gradient(var(--gold),var(--teal),var(--gold));animation:spin 6s linear infinite}
+.t-card .av img{width:100%;height:100%;border-radius:50%;object-fit:cover;border:3px solid #fff;animation:spin 6s linear infinite reverse}
+.stars i{font-style:normal;color:var(--gold);display:inline-block;margin-right:2px}
+.t-card q{display:block;font-size:14px;margin:6px 0 10px}
+.t-card b{font-size:14px;display:block}
+.t-card small{color:var(--teal);font-size:12px}
+
+/* ---------- Footer ---------- */
+footer{background:var(--navy);color:#cfd9e2;padding:100px 0 0;position:relative;overflow:hidden}
+footer .wave{position:absolute;top:-1px;left:0;width:100%;height:70px}
+.f-grid{display:grid;grid-template-columns:1.2fr 1fr 1.4fr 1.2fr;gap:30px;padding-bottom:30px;position:relative;z-index:2}
+.f-grid>div+div{border-left:1px solid rgba(255,255,255,.15);padding-left:30px}
+footer h5{color:#fff;font-size:14px;margin-bottom:14px;letter-spacing:1px}
+footer ul{list-style:none;font-size:13.5px;display:grid;gap:7px}
+footer ul a{transition:color .3s,padding .3s}footer ul a:hover{color:var(--gold);padding-left:6px}
+.social{display:flex;gap:12px}
+.social a{width:40px;height:40px;border-radius:50%;background:#fff;color:var(--navy);display:grid;place-items:center;font-weight:700}
+.big-sig{font-family:Caveat,cursive;font-size:clamp(70px,14vw,220px);color:transparent;-webkit-text-stroke:1px rgba(255,255,255,.25);white-space:nowrap;line-height:1;padding:10px 0 20px}
+.copy{background:#0a2439;font-size:12px;padding:14px 0;position:relative;z-index:2}
+.copy .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+
+/* back to top */
+#toTop{position:fixed;right:24px;bottom:24px;width:54px;height:54px;border-radius:50%;background:#fff;box-shadow:var(--shadow);border:0;cursor:pointer;z-index:80;display:grid;place-items:center;opacity:0;transform:scale(.5);transition:opacity .4s,transform .4s}
+#toTop.show{opacity:1;transform:none}
+#toTop svg{position:absolute;inset:0;transform:rotate(-90deg)}
+#toTop circle{fill:none;stroke:var(--teal);stroke-width:3;stroke-dasharray:151;stroke-dashoffset:151}
+#toTop b{color:var(--teal);font-size:18px}
+
+@media (max-width:1000px){
+  .menu,.nav-cta{display:none}.burger{display:block}
+  .menu.open{display:flex;flex-direction:column;position:absolute;top:100%;left:0;right:0;background:#fff;padding:20px 16px;box-shadow:var(--shadow)}
+  .cards4,.stat-grid{grid-template-columns:repeat(2,1fr)}
+  .prog-grid{grid-template-columns:repeat(2,1fr)}
+  .purpose .wrap{grid-template-columns:1fr}
+  .t-grid{grid-template-columns:1fr}
+  .f-grid{grid-template-columns:1fr 1fr}.f-grid>div+div{border:0;padding:0}
+  .stat{border:0}.hero-side{display:none}
+}
+@media (max-width:560px){
+  .cards4,.env-track,.prog-grid,.f-grid,.stat-grid{grid-template-columns:1fr}
+  .topbar .r{display:none}
+  .band .t{border:0;padding:0}
+}
+.no-anim #preloader{display:none}
+</style>
+</head>
+<body>
+
+<!-- Preloader -->
+<div id="preloader">
+  <div class="pl-top"></div><div class="pl-bot"></div>
+  <div class="pl-center">
+    <svg class="pl-logo" viewBox="0 0 100 100"><path class="draw" d="M50 22v58"/><path class="draw" d="M34 34h32"/><path class="draw" d="M20 60c4 16 16 24 30 24s26-8 30-24"/><path class="draw" d="M44 16a6 6 0 1 0 12 0a6 6 0 1 0-12 0"/><path class="draw" d="M14 62l6-6 6 6M74 62l6-6 6 6"/></svg>
+    <div class="pl-pct"><b id="plPct">0</b>THE ANCHORED SCHOOL</div>
+  </div>
+</div>
+
+<div class="cursor-dot"></div><div class="cursor-ring"></div>
+<div id="progress"></div>
+<button id="toTop" aria-label="Back to top"><svg viewBox="0 0 54 54"><circle cx="27" cy="27" r="24"/></svg><b>↑</b></button>
+
+<div class="topbar">
+  <div class="wrap">
+    <div class="l"><span>📞 469-813-5100</span><span>✉ texasinfo@theanchoredschool.org</span><span>Grounded in Learning</span></div>
+    <div class="r"><em>Faith. Knowledge. Character. A Brighter Tomorrow.</em></div>
+  </div>
+</div>
+
+<header class="nav" id="nav">
+  <div class="wrap">
+    <a href="#top" class="logo" aria-label="The Anchored School">
+      <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="46" fill="#e6f1f0"/><path d="M50 18v58M36 30h28M24 58c4 16 16 22 26 22s22-6 26-22" stroke="#0f5c5c" stroke-width="7" fill="none" stroke-linecap="round"/><circle cx="50" cy="16" r="6" fill="none" stroke="#0f5c5c" stroke-width="4"/><rect x="10" y="40" width="80" height="16" rx="4" fill="#0f5c5c"/><text x="50" y="52" text-anchor="middle" font-size="10" font-weight="700" fill="#fff" font-family="Merriweather">ANCHORED</text></svg>
+    </a>
+    <ul class="menu" id="menu">
+      <li><a class="active" href="#top"><span data-t="Home">Home</span></a></li>
+      <li><a href="#why"><span data-t="About">About</span></a></li>
+      <li><a href="#env"><span data-t="Our Environment">Our Environment</span></a></li>
+      <li><a href="#programs"><span data-t="Our Method">Our Method</span></a></li>
+      <li><a href="#admissions"><span data-t="Admissions">Admissions</span></a></li>
+      <li><a href="#stats"><span data-t="Careers">Careers</span></a></li>
+      <li><a href="#contact"><span data-t="Contact">Contact</span></a></li>
+    </ul>
+    <div class="nav-cta"><a class="btn btn-solid magnetic" href="#admissions">📅 Schedule a Tour <span class="arr">→</span></a><a class="btn btn-outline magnetic" href="#admissions">Apply Now <span class="arr">→</span></a></div>
+    <button class="burger" id="burger" aria-label="Menu">☰</button>
+  </div>
+</header>
+
+<section class="hero" id="top">
+  <div class="hero-media">
+    <div class="poster"></div>
+    <video autoplay muted loop playsinline poster="https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=1800&q=70">
+      <source src="assets/hero.mp4" type="video/mp4">
+      <source src="https://assets.mixkit.co/videos/4519/4519-720.mp4" type="video/mp4">
+    </video>
+  </div>
+  <div class="hero-overlay"></div>
+  <canvas id="particles"></canvas>
+  <div class="hero-content">
+    <div class="hero-inner">
+      <div class="eyebrow">Grounded in Learning</div>
+      <h1 id="heroTitle">Learning, with <em>purpose.</em></h1>
+      <p>A 4–8 microschool in Frisco, Texas — small classes, faith-based instruction, and hands-on discovery for every child.</p>
+      <div class="cta"><a class="btn btn-solid magnetic" href="#admissions">📅 Schedule a Visit <span class="arr">→</span></a><a class="btn btn-ghost magnetic" href="#programs">Explore Programs <span class="arr">→</span></a></div>
+    </div>
+  </div>
+  <div class="scroll-cue"></div>
+  <div class="hero-side">Faith · Knowledge · Character</div>
+</section>
+
+<div class="marquee" data-dir="left"><div class="mq-track"><span>Faith</span><span>Knowledge</span><span>Character</span><span>A Brighter Tomorrow</span><span>Faith</span><span>Knowledge</span><span>Character</span><span>A Brighter Tomorrow</span></div></div>
+
+<section class="why" id="why">
+  <svg class="leaf l1" viewBox="0 0 100 200" fill="currentColor"><path d="M50 200V20M50 60C20 50 10 30 15 10c20 5 35 25 35 50zM50 100C80 90 90 70 85 50 65 55 50 75 50 100zM50 140C20 130 10 110 15 90c20 5 35 25 35 50z"/></svg>
+  <svg class="leaf r1" viewBox="0 0 100 200" fill="currentColor"><path d="M50 200V20M50 60C20 50 10 30 15 10c20 5 35 25 35 50zM50 100C80 90 90 70 85 50 65 55 50 75 50 100zM50 140C20 130 10 110 15 90c20 5 35 25 35 50z"/></svg>
+  <div class="wrap">
+    <div class="sec-head"><span class="kicker" data-fade="up">About Us</span><h2 class="underline" data-split>Why Families Choose Us</h2><p style="margin-top:22px;color:var(--muted)" data-fade="blur">A nurturing environment where students are known, supported, and prepared for what’s next.</p></div>
+    <div class="cards4">
+      <div class="why-card glare tilt"><div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 5h7a3 3 0 0 1 3 3v12a2 2 0 0 0-2-2H2zM22 5h-7a3 3 0 0 0-3 3v12a2 2 0 0 1 2-2h8z"/></svg></div><h3>Academic Excellence</h3><p>Thoughtful instruction that builds confidence and a love of learning.</p></div>
+      <div class="why-card glare tilt"><div class="icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-8-5.5-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 5.5-8 11-8 11z"/></svg></div><h3>Character Development</h3><p>Instilling integrity, kindness, and leadership for life beyond the classroom.</p></div>
+      <div class="why-card glare tilt"><div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 2v20M6 8h12"/></svg></div><h3>Faith Integration</h3><p>Christ-centered education that shapes hearts and minds.</p></div>
+      <div class="why-card glare tilt"><div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="7" r="3"/><circle cx="16" cy="7" r="3"/><path d="M2 21v-2a5 5 0 0 1 10 0v2M12 21v-2a5 5 0 0 1 10 0v2"/></svg></div><h3>Community Focused</h3><p>A close-knit school family where every child belongs.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="stats" id="stats">
+  <div class="stats-bg"></div>
+  <div class="wrap">
+    <h2 data-split>Small classes. Big impact.</h2>
+    <div class="stat-grid">
+      <div class="stat"><b><span class="count" data-to="8" data-prefix="4–">4–8</span></b><span>Grades served</span></div>
+      <div class="stat"><b><span class="count" data-to="12">12</span></b><span>Max class size</span></div>
+      <div class="stat"><b><span class="count" data-to="100" data-suffix="%">100%</span></b><span>Christ-centered</span></div>
+      <div class="stat"><b><span class="count" data-to="3">3</span></b><span>Texas communities</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="env" id="env">
+  <div class="wrap row-head">
+    <div><span class="kicker" data-fade="up">Campus</span><h2 data-split>Our Learning Environment</h2><p style="color:var(--muted)" data-fade="up">Beautiful spaces that inspire curiosity, creativity, and growth.</p></div>
+    <a class="link" href="#" data-fade="right">Explore Our Campus <span class="arr">→</span></a>
+  </div>
+  <div class="env-track">
+    <div class="tile" data-cursor="View"><img src="https://images.unsplash.com/photo-1509062522246-3755977927d7?w=1200&q=70" alt="Classroom"><div class="cap"><span class="num">01</span><b>Calm Classrooms</b><small>Inviting spaces for focused learning</small></div></div>
+    <div class="tile" data-cursor="View"><img src="https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=1200&q=70" alt="Books"><div class="cap"><span class="num">02</span><b>Reading &amp; Discovery</b><small>A love of books begins here</small></div></div>
+    <div class="tile" data-cursor="View"><img src="https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=1200&q=70" alt="Art studio"><div class="cap"><span class="num">03</span><b>Creative Studios</b><small>Explore. Create. Express.</small></div></div>
+    <div class="tile" data-cursor="View"><img src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1200&q=70" alt="Outdoors"><div class="cap"><span class="num">04</span><b>Outdoor Learning</b><small>Nature inspires big thinking</small></div></div>
+    <div class="tile end"><div><h3>See it in person.</h3><a class="btn btn-w magnetic" href="#admissions">📅 Book a Tour <span class="arr">→</span></a></div></div>
+  </div>
+  <div class="wrap env-progress"><span></span></div>
+</section>
+
+<section class="programs" id="programs">
+  <div class="wrap">
+    <div class="row-head"><div><span class="kicker" data-fade="up">Our Method</span><h2 data-split>Our Programs &amp; Environments</h2></div><a class="link" href="#" data-fade="right">Learn More About Our Programs <span class="arr">→</span></a></div>
+    <div class="prog-grid">
+      <a class="prog glare" href="#" data-cursor="Explore"><h4><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 22V12C12 6 6 4 2 5c0 5 4 8 10 7M12 12c0-4 4-7 10-6-1 5-5 7-10 6"/></svg>Nursery</h4><div class="ph skew"><img src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=600&q=70" alt=""></div><div class="foot">Inviting start in a nurturing environment.<span class="circ">→</span></div></a>
+      <a class="prog glare" href="#" data-cursor="Explore"><h4><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/><circle cx="8" cy="9" r="1.6" fill="#fff"/><circle cx="14" cy="7" r="1.6" fill="#fff"/></svg>Studio</h4><div class="ph skew"><img src="https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?w=600&q=70" alt=""></div><div class="foot">Hands-on learning through the arts and creativity.<span class="circ">→</span></div></a>
+      <a class="prog glare" href="#" data-cursor="Explore"><h4><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 2h6v2h-1v5l6 11a2 2 0 0 1-2 3H6a2 2 0 0 1-2-3l6-11V4H9z"/></svg>Elementary Lab</h4><div class="ph skew"><img src="https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=600&q=70" alt=""></div><div class="foot">Building strong foundations through exploration.<span class="circ">→</span></div></a>
+      <a class="prog glare" href="#" data-cursor="Explore"><h4><svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 4h8a2 2 0 0 1 2 2v14a2 2 0 0 0-2-2H2zM22 4h-8a2 2 0 0 0-2 2v14a2 2 0 0 1 2-2h8z"/></svg>Middle School</h4><div class="ph skew"><img src="https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?w=600&q=70" alt=""></div><div class="foot">Growing independent thinkers and leaders.<span class="circ">→</span></div></a>
+      <a class="prog glare" href="#" data-cursor="Explore"><h4><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5 2 7.5L12 16.5 5.5 21l2-7.5L2 9h7z"/></svg>Enrichment Programs</h4><div class="ph skew"><img src="https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=600&q=70" alt=""></div><div class="foot">Extended learning opportunities to explore new interests.<span class="circ">→</span></div></a>
+    </div>
+  </div>
+</section>
+
+<section class="purpose">
+  <div class="wrap">
+    <div class="txt">
+      <h2 data-split>Learning with Purpose</h2>
+      <p data-scrub>At The Anchored School, academic growth is supported through thoughtful instruction, strong expectations, and a learning environment where students are encouraged to think, ask questions, and build confidence.</p>
+      <a class="btn btn-solid magnetic" href="#">Our Story <span class="arr">→</span></a>
+    </div>
+    <div class="img" data-cursor="Our Story"><img src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1000&q=70" alt="Student writing"></div>
+    <div class="quote"><span class="qbar"></span><span class="ql">“Train up a child</span><span class="ql">in the way he</span><span class="ql">should go…”</span><small>PROVERBS 22:6</small></div>
+  </div>
+</section>
+
+<section class="band" id="admissions">
+  <div class="wrap">
+    <div class="cal"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4M7 14h2M11 14h2M15 14h2M7 17h2M11 17h2"/></svg></div>
+    <div class="t"><small data-fade="up">Admissions</small><h2 data-split>Ready to Join The Anchored School Family?</h2><p data-fade="up">Discover a Christ-centered education where your child can thrive.</p></div>
+    <div class="band-cta" style="display:flex;gap:12px;flex-wrap:wrap"><a class="btn btn-w magnetic" href="#">📅 Schedule a Tour <span class="arr">→</span></a><a class="btn btn-ghost magnetic" href="#">Apply Now <span class="arr">→</span></a></div>
+  </div>
+</section>
+
+<div class="marquee alt" data-dir="right"><div class="mq-track"><span>Grounded in Learning</span><span>Academic Excellence</span><span>Christ-Centered</span><span>Grounded in Learning</span><span>Academic Excellence</span><span>Christ-Centered</span></div></div>
+
+<section class="testi">
+  <div class="wrap">
+    <div class="row-head"><div><span class="kicker" data-fade="up">Testimonials</span><h2 class="underline" data-split>What Families Are Saying</h2></div><a class="link" href="#" data-fade="right">More Testimonials <span class="arr">→</span></a></div>
+    <div class="t-grid">
+      <div class="t-card glare skew"><div class="av"><img src="https://randomuser.me/api/portraits/women/44.jpg" alt=""></div><div><div class="stars"><i>★</i><i>★</i><i>★</i><i>★</i><i>★</i></div><q>The Anchored School has been such a blessing for our family. Our children are thriving academically and spiritually!</q><b>— Sarah M.</b><small>Parent of 2nd &amp; 5th Graders</small></div></div>
+      <div class="t-card glare skew"><div class="av"><img src="https://randomuser.me/api/portraits/men/32.jpg" alt=""></div><div><div class="stars"><i>★</i><i>★</i><i>★</i><i>★</i><i>★</i></div><q>A Christ-centered environment with amazing teachers who truly care. We couldn’t be happier!</q><b>— Michael T.</b><small>Parent of a 6th Grader</small></div></div>
+      <div class="t-card glare skew"><div class="av"><img src="https://randomuser.me/api/portraits/women/65.jpg" alt=""></div><div><div class="stars"><i>★</i><i>★</i><i>★</i><i>★</i><i>★</i></div><q>This school feels like family. The focus on character and faith sets it apart.</q><b>— Jennifer L.</b><small>Parent of a 1st Grader</small></div></div>
+    </div>
+  </div>
+</section>
+
+<footer id="contact">
+  <svg class="wave" viewBox="0 0 1440 70" preserveAspectRatio="none"><path id="wavePath" fill="#fff" d="M0 0 H1440 V20 C1200 60 960 60 720 30 C480 0 240 10 0 40 Z"/></svg>
+  <div class="wrap f-grid">
+    <div><div class="logo"><svg viewBox="0 0 100 100" style="width:110px;height:110px"><circle cx="50" cy="50" r="46" fill="#123a5c"/><path d="M50 18v58M36 30h28M24 58c4 16 16 22 26 22s22-6 26-22" stroke="#fff" stroke-width="7" fill="none" stroke-linecap="round"/><rect x="10" y="40" width="80" height="16" rx="4" fill="#0f5c5c"/><text x="50" y="52" text-anchor="middle" font-size="10" font-weight="700" fill="#fff" font-family="Merriweather">ANCHORED</text></svg></div><p style="font-size:11px;letter-spacing:2px;margin-top:8px">GROUNDED IN LEARNING</p></div>
+    <div><h5>Quick Links</h5><ul><li><a href="#top">Home</a></li><li><a href="#why">About</a></li><li><a href="#env">Our Environment</a></li><li><a href="#programs">Our Method</a></li><li><a href="#admissions">Admissions</a></li><li><a href="#stats">Careers</a></li><li><a href="#contact">Contact</a></li></ul></div>
+    <div><h5>Contact Us</h5><ul><li>📞 469-813-5100</li><li>✉ texasinfo@theanchoredschool.org</li><li>📍 Prosper, Celina, Texas</li><li>🌐 www.theanchoredschool.org</li></ul></div>
+    <div><h5>Follow Us</h5><div class="social"><a class="magnetic" href="#" aria-label="Facebook">f</a><a class="magnetic" href="#" aria-label="Instagram">◎</a></div></div>
+  </div>
+  <div class="big-sig">Faith Changes Everything.</div>
+  <div class="copy"><div class="wrap"><span>© 2024 The Anchored School. All rights reserved.</span><span>Grounded in Learning · Academic Excellence · Christ-Centered · A Brighter Tomorrow</span></div></div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+<script>
+document.getElementById('burger').onclick = () => document.getElementById('menu').classList.toggle('open');
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+if (!window.gsap || !window.ScrollTrigger || reduce) {
+  document.documentElement.classList.add('no-anim');
+} else {
+  init();
+}
+
+function splitWords(el) {
+  const words = el.innerHTML.trim().split(/\s+(?![^<]*>)/);
+  el.innerHTML = words.map(w => `<span class="w"><span class="wi">${w}</span></span>`).join(' ');
+  return el.querySelectorAll('.wi');
+}
+function splitChars(el) {
+  // keeps <em> styling: split text nodes into chars
+  const out = [];
+  const walk = node => {
+    [...node.childNodes].forEach(n => {
+      if (n.nodeType === 3) {
+        const frag = document.createDocumentFragment();
+        n.textContent.split(/(\s+)/).forEach(part => {
+          if (!part) return;
+          if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(' ')); return; }
+          const w = document.createElement('span'); w.style.cssText = 'display:inline-block;white-space:nowrap';
+          [...part].forEach(ch => { const c = document.createElement('span'); c.className = 'c'; c.textContent = ch; w.appendChild(c); out.push(c); });
+          frag.appendChild(w);
+        });
+        n.replaceWith(frag);
+      } else walk(n);
+    });
+  };
+  walk(el);
+  return out;
+}
+
+function init() {
+  gsap.registerPlugin(ScrollTrigger);
+  const nav = document.getElementById('nav');
+
+  /* ---------- Smooth scroll ---------- */
+  let lenis = null;
+  if (window.Lenis) {
+    lenis = new Lenis({ lerp: 0.085, smoothWheel: true });
+    lenis.on('scroll', ScrollTrigger.update);
+    gsap.ticker.add(t => lenis.raf(t * 1000));
+    gsap.ticker.lagSmoothing(0);
+    lenis.stop();
+  }
+  document.querySelectorAll('a[href^="#"]').forEach(a => a.addEventListener('click', e => {
+    const id = a.getAttribute('href'); if (id.length < 2) return;
+    const t = document.querySelector(id); if (!t) return;
+    e.preventDefault(); document.getElementById('menu').classList.remove('open');
+    lenis ? lenis.scrollTo(t, { offset: -60, duration: 1.6 }) : t.scrollIntoView({ behavior: 'smooth' });
+  }));
+  document.getElementById('toTop').onclick = () => lenis ? lenis.scrollTo(0, { duration: 2 }) : scrollTo({ top: 0, behavior: 'smooth' });
+
+  /* ---------- Preloader → hero intro ---------- */
+  const pre = document.getElementById('preloader');
+  const draws = pre.querySelectorAll('.draw');
+  draws.forEach(p => { const l = p.getTotalLength(); p.style.strokeDasharray = l; p.style.strokeDashoffset = l; });
+  const pct = document.getElementById('plPct'), counter = { v: 0 };
+  gsap.timeline({ onComplete: () => { pre.remove(); lenis && lenis.start(); ScrollTrigger.refresh(); } })
+    .to(draws, { strokeDashoffset: 0, duration: 1.3, stagger: 0.12, ease: 'power2.inOut' })
+    .to(counter, { v: 100, duration: 1.7, ease: 'power2.inOut', onUpdate: () => pct.textContent = Math.round(counter.v) }, 0)
+    .to('.pl-center', { y: -40, opacity: 0, duration: 0.5, ease: 'power2.in' }, '+=.1')
+    .addLabel('split')
+    .to('.pl-top', { yPercent: -100, duration: 1.1, ease: 'expo.inOut' }, 'split')
+    .to('.pl-bot', { yPercent: 100, duration: 1.1, ease: 'expo.inOut' }, 'split')
+    .add(heroIntro(), 'split+=.3');
+
+  function heroIntro() {
+    const chars = splitChars(document.getElementById('heroTitle'));
+    return gsap.timeline()
+      .from('.hero-media', { scale: 1.4, duration: 2.4, ease: 'expo.out' }, 0)
+      .from('.topbar', { opacity: 0, y: -20, duration: 0.8 }, 0.1)
+      .from('#nav .logo, #nav .menu li, #nav .nav-cta > *, #nav .burger', { y: -40, opacity: 0, stagger: 0.05, duration: 0.9, ease: 'power3.out' }, 0.15)
+      .from('.hero .eyebrow', { letterSpacing: '22px', opacity: 0, duration: 1.4, ease: 'power3.out' }, 0.3)
+      .from(chars, { yPercent: 120, rotateX: -100, opacity: 0, stagger: 0.035, duration: 1.1, ease: 'back.out(1.8)', transformOrigin: '50% 100%' }, 0.45)
+      .from('.hero p', { y: 30, opacity: 0, filter: 'blur(10px)', duration: 1.1 }, 1.1)
+      .from('.hero .cta .btn', { y: 40, opacity: 0, scale: 0.7, stagger: 0.12, duration: 0.9, ease: 'back.out(2)' }, 1.3)
+      .from('.scroll-cue, .hero-side', { opacity: 0, y: 20, duration: 0.8 }, 1.6);
+  }
+
+  /* ---------- Hero scroll + mouse parallax ---------- */
+  gsap.timeline({ scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: true } })
+    .to('.hero-media video, .hero-media .poster', { yPercent: 22, scale: 1.2, ease: 'none' }, 0)
+    .to('.hero-content', { yPercent: 60, opacity: 0, filter: 'blur(12px)', ease: 'none' }, 0)
+    .to('.hero', { clipPath: 'inset(0% 3% 0% 3% round 0px 0px 60px 60px)', ease: 'none' }, 0);
+
+  const hxIn = gsap.quickTo('.hero-inner', 'x', { duration: 1, ease: 'power3' }), hyIn = gsap.quickTo('.hero-inner', 'y', { duration: 1, ease: 'power3' });
+  const hxM = gsap.quickTo('.hero-media', 'x', { duration: 1.4, ease: 'power3' }), hyM = gsap.quickTo('.hero-media', 'y', { duration: 1.4, ease: 'power3' });
+  document.querySelector('.hero').addEventListener('mousemove', e => {
+    const x = e.clientX / innerWidth - 0.5, y = e.clientY / innerHeight - 0.5;
+    hxIn(x * 30); hyIn(y * 20); hxM(x * -25); hyM(y * -15);
+  });
+
+  /* ---------- Particles ---------- */
+  const cv = document.getElementById('particles'), ctx = cv.getContext('2d'), dpr = Math.min(devicePixelRatio, 2);
+  let W, H, heroOn = true;
+  const resize = () => { W = cv.width = cv.offsetWidth * dpr; H = cv.height = cv.offsetHeight * dpr; };
+  resize(); addEventListener('resize', resize);
+  const ps = Array.from({ length: 80 }, () => ({ x: Math.random(), y: Math.random(), r: Math.random() * 2 + 0.4, s: Math.random() * 0.0009 + 0.0002, t: Math.random() * 6.28 }));
+  ScrollTrigger.create({ trigger: '.hero', start: 'top bottom', end: 'bottom top', onToggle: s => heroOn = s.isActive });
+  gsap.ticker.add(() => {
+    if (!heroOn) return;
+    ctx.clearRect(0, 0, W, H);
+    ps.forEach(p => {
+      p.y -= p.s; p.t += 0.025;
+      if (p.y < -0.02) { p.y = 1.02; p.x = Math.random(); }
+      ctx.beginPath();
+      ctx.arc(p.x * W + Math.sin(p.t * 0.6) * 14 * dpr, p.y * H, p.r * dpr, 0, 6.283);
+      ctx.fillStyle = `rgba(255,214,140,${0.3 + Math.sin(p.t) * 0.3})`;
+      ctx.fill();
+    });
+  });
+
+  /* ---------- Nav, progress, back-to-top ---------- */
+  const bar = document.getElementById('progress'), toTop = document.getElementById('toTop'), ringC = toTop.querySelector('circle');
+  ScrollTrigger.create({
+    start: 0, end: 'max',
+    onUpdate: self => {
+      const y = self.scroll();
+      bar.style.transform = `scaleX(${self.progress})`;
+      ringC.style.strokeDashoffset = 151 - 151 * self.progress;
+      toTop.classList.toggle('show', y > 600);
+      nav.classList.toggle('scrolled', y > 40);
+      nav.classList.toggle('hide', self.direction === 1 && y > 700);
+    }
+  });
+
+  /* ---------- Marquees react to scroll velocity ---------- */
+  const mqTweens = gsap.utils.toArray('.marquee').map(m => {
+    const tr = m.querySelector('.mq-track');
+    const tw = m.dataset.dir === 'right'
+      ? gsap.fromTo(tr, { xPercent: -50 }, { xPercent: 0, duration: 30, ease: 'none', repeat: -1 })
+      : gsap.fromTo(tr, { xPercent: 0 }, { xPercent: -50, duration: 30, ease: 'none', repeat: -1 });
+    tw.totalTime(3000);
+    return tw;
+  });
+
+  /* ---------- Velocity skew ---------- */
+  const skewEls = gsap.utils.toArray('.skew');
+  const setSkew = gsap.quickSetter(skewEls, 'skewY', 'deg');
+  const clampSkew = gsap.utils.clamp(-7, 7);
+  const proxy = { skew: 0 };
+  ScrollTrigger.create({
+    onUpdate: self => {
+      const v = self.getVelocity();
+      const s = clampSkew(v / -350);
+      if (Math.abs(s) > Math.abs(proxy.skew)) {
+        proxy.skew = s;
+        gsap.to(proxy, { skew: 0, duration: 0.9, ease: 'power3', overwrite: true, onUpdate: () => setSkew(proxy.skew) });
+      }
+      const speed = 1 + Math.min(Math.abs(v) / 250, 6);
+      mqTweens.forEach(tw => gsap.to(tw, { timeScale: speed * self.direction, duration: 0.2, overwrite: true, onComplete: () => gsap.to(tw, { timeScale: self.direction, duration: 1.2 }) }));
+    }
+  });
+
+  /* ---------- Generic text reveals ---------- */
+  gsap.utils.toArray('[data-split]').forEach(el => {
+    const w = splitWords(el);
+    gsap.from(w, { yPercent: 115, rotate: 6, duration: 1.2, stagger: 0.07, ease: 'power4.out', scrollTrigger: { trigger: el, start: 'top 88%' } });
+    if (el.classList.contains('underline')) ScrollTrigger.create({ trigger: el, start: 'top 88%', onEnter: () => el.classList.add('in') });
+  });
+  gsap.utils.toArray('[data-fade]').forEach(el => {
+    const d = el.dataset.fade, v = { opacity: 0, duration: 1.2, ease: 'power3.out', scrollTrigger: { trigger: el, start: 'top 90%' } };
+    if (d === 'up') v.y = 50; if (d === 'left') v.x = -80; if (d === 'right') v.x = 80;
+    if (d === 'blur') { v.filter = 'blur(12px)'; v.y = 30; v.delay = 0.3; }
+    gsap.from(el, v);
+  });
+  gsap.utils.toArray('[data-scrub]').forEach(el => {
+    const words = el.textContent.trim().split(/\s+/);
+    el.innerHTML = words.map(w => `<span>${w}</span>`).join(' ');
+    gsap.fromTo(el.children, { opacity: 0.12 }, { opacity: 1, stagger: 0.1, ease: 'none', scrollTrigger: { trigger: el, start: 'top 85%', end: 'bottom 45%', scrub: true } });
+  });
+
+  /* ---------- Why ---------- */
+  gsap.to('.leaf.l1', { y: -160, rotate: 25, ease: 'none', scrollTrigger: { trigger: '.why', scrub: true } });
+  gsap.fromTo('.leaf.r1', { scaleX: -1 }, { scaleX: -1, y: 200, rotate: -30, ease: 'none', scrollTrigger: { trigger: '.why', scrub: true } });
+  const whyTl = gsap.timeline({ scrollTrigger: { trigger: '.cards4', start: 'top 85%' } });
+  whyTl.from('.why-card', { y: 160, rotateX: -70, opacity: 0, transformPerspective: 1000, transformOrigin: '50% 0%', stagger: 0.15, duration: 1.4, ease: 'expo.out' })
+       .from('.why-card .icon', { scale: 0, rotate: -270, stagger: 0.15, duration: 1.1, ease: 'back.out(2)' }, 0.35)
+       .from('.why-card h3, .why-card p', { y: 20, opacity: 0, stagger: 0.06, duration: 0.8 }, 0.5);
+
+  /* ---------- Stats ---------- */
+  gsap.fromTo('.stats-bg', { yPercent: -12 }, { yPercent: 12, ease: 'none', scrollTrigger: { trigger: '.stats', scrub: true } });
+  gsap.from('.stat', { y: 80, opacity: 0, scale: 0.8, stagger: 0.12, duration: 1.2, ease: 'expo.out', scrollTrigger: { trigger: '.stat-grid', start: 'top 85%' } });
+  document.querySelectorAll('.count').forEach(el => {
+    const o = { v: 0 }, to = +el.dataset.to, pre = el.dataset.prefix || '', suf = el.dataset.suffix || '';
+    el.textContent = pre + 0 + suf;
+    gsap.to(o, { v: to, duration: 2.2, ease: 'power3.out', scrollTrigger: { trigger: el, start: 'top 88%' }, onUpdate: () => el.textContent = pre + Math.round(o.v) + suf });
+  });
+
+  /* ---------- Environment: horizontal scroll on desktop ---------- */
+  const mm = gsap.matchMedia();
+  mm.add('(min-width: 1001px)', () => {
+    const track = document.querySelector('.env-track');
+    const dist = () => track.scrollWidth - innerWidth;
+    gsap.from('.tile', { clipPath: 'inset(100% 0% 0% 0% round 18px)', y: 80, stagger: 0.12, duration: 1.4, ease: 'expo.out', scrollTrigger: { trigger: '.env', start: 'top 65%' } });
+    const tween = gsap.to(track, { x: () => -dist(), ease: 'none', scrollTrigger: { trigger: '.env', pin: true, scrub: 1, start: 'top top', end: () => '+=' + dist(), invalidateOnRefresh: true } });
+    gsap.to('.env-progress span', { scaleX: 1, ease: 'none', scrollTrigger: { trigger: '.env', start: 'top top', end: () => '+=' + dist(), scrub: true, invalidateOnRefresh: true } });
+    gsap.utils.toArray('.tile:not(.end)').forEach(t => {
+      gsap.fromTo(t.querySelector('img'), { xPercent: -9 }, { xPercent: 9, ease: 'none', scrollTrigger: { trigger: t, containerAnimation: tween, start: 'left right', end: 'right left', scrub: true } });
+      gsap.from(t.querySelectorAll('.cap > *'), { y: 40, opacity: 0, stagger: 0.1, duration: 0.9, ease: 'power3.out', scrollTrigger: { trigger: t, containerAnimation: tween, start: 'left 70%' } });
+    });
+    gsap.from('.tile.end h3, .tile.end .btn', { scale: 0.6, opacity: 0, stagger: 0.15, duration: 1, ease: 'back.out(2)', scrollTrigger: { trigger: '.tile.end', containerAnimation: tween, start: 'left 80%' } });
+  });
+  mm.add('(max-width: 1000px)', () => {
+    gsap.utils.toArray('.tile').forEach(t => gsap.from(t, { clipPath: 'inset(100% 0% 0% 0% round 18px)', duration: 1.3, ease: 'expo.out', scrollTrigger: { trigger: t, start: 'top 92%' } }));
+  });
+
+  /* ---------- Programs ---------- */
+  gsap.from('.prog', { y: 180, opacity: 0, rotate: i => (i - 2) * 9, transformOrigin: '50% 100%', stagger: 0.1, duration: 1.4, ease: 'expo.out', scrollTrigger: { trigger: '.prog-grid', start: 'top 88%' } });
+
+  /* ---------- Purpose ---------- */
+  gsap.timeline({ scrollTrigger: { trigger: '.purpose', start: 'top 70%' } })
+    .from('.purpose .txt', { x: -60, opacity: 0, duration: 1.2, ease: 'expo.out' })
+    .from('.purpose .img', { clipPath: 'inset(50% 50% 50% 50% round 22px)', rotate: -6, duration: 1.6, ease: 'expo.inOut' }, 0)
+    .from('.qbar', { scaleX: 0, duration: 0.8, ease: 'power3.inOut' }, 0.8)
+    .from('.ql', { clipPath: 'inset(0 100% 0 0)', duration: 0.9, stagger: 0.35, ease: 'power2.inOut' }, 1)
+    .from('.quote small', { opacity: 0, y: 10, duration: 0.6 }, 2);
+  gsap.fromTo('.purpose .img img', { scale: 1.45, yPercent: -8 }, { scale: 1.05, yPercent: 8, ease: 'none', scrollTrigger: { trigger: '.purpose', start: 'top bottom', end: 'bottom top', scrub: true } });
+
+  /* ---------- Band ---------- */
+  gsap.fromTo('.band', { clipPath: 'inset(0% 8% 0% 8% round 60px)' }, { clipPath: 'inset(0% 0% 0% 0% round 0px)', ease: 'none', scrollTrigger: { trigger: '.band', start: 'top bottom', end: 'top 45%', scrub: true } });
+  gsap.from('.cal', { scale: 0, rotate: -360, duration: 1.3, ease: 'back.out(1.6)', scrollTrigger: { trigger: '.band', start: 'top 75%' } });
+  gsap.from('.band-cta .btn', { x: 80, opacity: 0, stagger: 0.15, duration: 1, ease: 'expo.out', scrollTrigger: { trigger: '.band', start: 'top 75%' } });
+
+  /* ---------- Testimonials ---------- */
+  gsap.from('.t-card', { y: i => 120 + i * 60, opacity: 0, rotate: i => (i - 1) * -5, stagger: 0.15, duration: 1.4, ease: 'expo.out', scrollTrigger: { trigger: '.t-grid', start: 'top 88%' } });
+  gsap.from('.stars i', { scale: 0, rotate: -180, opacity: 0, stagger: 0.04, ease: 'back.out(3)', duration: 0.6, delay: 0.6, scrollTrigger: { trigger: '.t-grid', start: 'top 88%' } });
+
+  /* ---------- Footer ---------- */
+  gsap.from('.f-grid > div', { y: 70, opacity: 0, stagger: 0.12, duration: 1.1, ease: 'power3.out', scrollTrigger: { trigger: 'footer', start: 'top 85%' } });
+  gsap.fromTo('.big-sig', { xPercent: 25 }, { xPercent: -15, ease: 'none', scrollTrigger: { trigger: 'footer', start: 'top bottom', end: 'bottom bottom', scrub: true } });
+  gsap.to('#wavePath', { attr: { d: 'M0 0 H1440 V40 C1200 10 960 0 720 40 C480 70 240 60 0 20 Z' }, duration: 3.5, repeat: -1, yoyo: true, ease: 'sine.inOut' });
+
+  /* ---------- 3D tilt + glare ---------- */
+  document.querySelectorAll('.tilt').forEach(c => {
+    c.addEventListener('mousemove', e => {
+      const r = c.getBoundingClientRect(), x = (e.clientX - r.left) / r.width - 0.5, y = (e.clientY - r.top) / r.height - 0.5;
+      gsap.to(c, { rotateY: x * 18, rotateX: -y * 18, y: -10, transformPerspective: 800, duration: 0.5, ease: 'power2.out' });
+    });
+    c.addEventListener('mouseleave', () => gsap.to(c, { rotateY: 0, rotateX: 0, y: 0, duration: 1, ease: 'elastic.out(1,.4)' }));
+  });
+  document.querySelectorAll('.glare').forEach(c => c.addEventListener('mousemove', e => {
+    const r = c.getBoundingClientRect();
+    c.style.setProperty('--mx', (e.clientX - r.left) + 'px'); c.style.setProperty('--my', (e.clientY - r.top) + 'px');
+  }));
+  document.querySelectorAll('.prog').forEach(c => {
+    c.addEventListener('mouseenter', () => gsap.to(c, { y: -14, duration: 0.5, ease: 'power3.out' }));
+    c.addEventListener('mouseleave', () => gsap.to(c, { y: 0, duration: 0.8, ease: 'elastic.out(1,.5)' }));
+  });
+
+  /* ---------- Magnetic buttons + custom cursor (mouse only) ---------- */
+  if (matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    document.querySelectorAll('.magnetic').forEach(el => {
+      el.addEventListener('mousemove', e => {
+        const r = el.getBoundingClientRect();
+        gsap.to(el, { x: (e.clientX - r.left - r.width / 2) * 0.35, y: (e.clientY - r.top - r.height / 2) * 0.45, duration: 0.4, ease: 'power3.out' });
+      });
+      el.addEventListener('mouseleave', () => gsap.to(el, { x: 0, y: 0, duration: 1, ease: 'elastic.out(1,.35)' }));
+    });
+
+    document.body.classList.add('has-cursor');
+    const dot = document.querySelector('.cursor-dot'), ring = document.querySelector('.cursor-ring');
+    gsap.set([dot, ring], { xPercent: -50, yPercent: -50 });
+    const dx = gsap.quickTo(dot, 'x', { duration: 0.08 }), dy = gsap.quickTo(dot, 'y', { duration: 0.08 });
+    const rx = gsap.quickTo(ring, 'x', { duration: 0.5, ease: 'power3' }), ry = gsap.quickTo(ring, 'y', { duration: 0.5, ease: 'power3' });
+    addEventListener('mousemove', e => { dx(e.clientX); dy(e.clientY); rx(e.clientX); ry(e.clientY); });
+    document.querySelectorAll('a, button').forEach(el => {
+      el.addEventListener('mouseenter', () => ring.classList.add('hover'));
+      el.addEventListener('mouseleave', () => ring.classList.remove('hover'));
+    });
+    document.querySelectorAll('[data-cursor]').forEach(el => {
+      el.addEventListener('mouseenter', () => { ring.dataset.label = el.dataset.cursor; ring.classList.add('label'); gsap.to(dot, { scale: 0, duration: 0.3 }); });
+      el.addEventListener('mouseleave', () => { ring.classList.remove('label'); gsap.to(dot, { scale: 1, duration: 0.3 }); });
+    });
+  }
+
+  addEventListener('load', () => ScrollTrigger.refresh());
+}
+</script>
+</body>
+</html>
